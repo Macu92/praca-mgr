@@ -1,33 +1,137 @@
 package pl.com.stock.work.util;
 
-import java.time.LocalDateTime;
 import java.util.LinkedList;
 import java.util.List;
 
 import org.joda.time.DateTime;
+import org.joda.time.Minutes;
+import org.joda.time.Period;
 
+import eu.verdelhan.ta4j.Decimal;
 import eu.verdelhan.ta4j.Tick;
+import eu.verdelhan.ta4j.TimeSeries;
 import pl.com.stock.work.model.StockDataSet;
+import pl.com.stock.work.model.StockRecord;
 
 public class TimeSeriesGenerator {
-	
-	public void generateTimeSeries(StockDataSet dataSet, Integer interval){
-		List<Tick> tickList =  new LinkedList();
-		dataSet.getRecords().forEach(record -> {
-			Tick tick;
-//			if(tickList.size()>0){
-//				tick = tickList.get(tickList.size()-1);
-//			}else{
-				DateTime time = record.getDate();
-				tick =  new Tick(time,
-						record.getPriceValue().doubleValue(),
-						record.getPriceValue().doubleValue(),
-						record.getPriceValue().doubleValue(),
-						record.getPriceValue().doubleValue(),
-						(double)0);
-//			}
-				tickList.add(tick);
-		});
-		System.out.println("OK");
+
+	public TimeSeries generateTimeSeries(StockDataSet dataSet, Integer interval) {
+		List<Tick> tickList = new LinkedList();
+		MutableTick mutableTick = null;
+		for (StockRecord record : dataSet.getRecords()) {
+			if (mutableTick != null
+					&& mutableTick.getStartDateTime().getMinuteOfHour() == record.getDate().getMinuteOfHour()
+					&& Minutes.minutesBetween(mutableTick.getStartDateTime(), record.getDate()).getMinutes() == 0) {
+				mutableTick.setHighPrice(record.getPriceValue().isGreaterThan(mutableTick.getHighPrice())
+						? record.getPriceValue() : mutableTick.getHighPrice());
+				mutableTick.setLowPrice(record.getPriceValue().isLessThan(mutableTick.getLowPrice())
+						? record.getPriceValue() : mutableTick.getLowPrice());
+				mutableTick.setClosePrice(record.getPriceValue());
+			} else {
+				if (mutableTick != null) {
+					Tick tick = new Tick(mutableTick.getPeriod(), mutableTick.getEndDateTime(),
+							mutableTick.getOpenPrice(), mutableTick.getHighPrice(), mutableTick.getLowPrice(),
+							mutableTick.getClosePrice(), mutableTick.getVolume());
+					tickList.add(tick);
+				}
+				DateTime time = new DateTime(record.getDate().getYear(), record.getDate().getMonthOfYear(),
+						record.getDate().getDayOfMonth(), record.getDate().getHourOfDay(),
+						record.getDate().getMinuteOfHour());
+				mutableTick = new MutableTick(Minutes.minutes(1).toPeriod(),time,time.plusMinutes(1), record.getPriceValue(), record.getPriceValue(),
+						record.getPriceValue(), record.getPriceValue(), Decimal.valueOf(0));
+			}
+		}
+		Tick tick = new Tick(mutableTick.getPeriod(), mutableTick.getEndDateTime(),
+				mutableTick.getOpenPrice(), mutableTick.getHighPrice(), mutableTick.getLowPrice(),
+				mutableTick.getClosePrice(), mutableTick.getVolume());
+		tickList.add(tick);
+		return new TimeSeries(tickList);
+	}
+
+	private class MutableTick {
+		Period period;
+		DateTime startDateTime;
+		DateTime endDateTime;
+		Decimal openPrice;
+		Decimal highPrice;
+		Decimal lowPrice;
+		Decimal closePrice;
+		Decimal volume;
+
+		public MutableTick(Period period,DateTime startDateTime, DateTime endDateTime, Decimal openPrice, Decimal highPrice, Decimal lowPrice,
+				Decimal closePrice, Decimal volume) {
+			this.startDateTime = startDateTime;
+			this.period = period;
+			this.endDateTime = endDateTime;
+			this.openPrice = openPrice;
+			this.highPrice = highPrice;
+			this.lowPrice = lowPrice;
+			this.closePrice = closePrice;
+			this.volume = volume;
+		}
+
+		public DateTime getStartDateTime() {
+			return startDateTime;
+		}
+
+		public void setStartDateTime(DateTime startDateTime) {
+			this.startDateTime = startDateTime;
+		}
+
+		public Period getPeriod() {
+			return period;
+		}
+
+		public void setPeriod(Period period) {
+			this.period = period;
+		}
+
+		public Decimal getOpenPrice() {
+			return openPrice;
+		}
+
+		public void setOpenPrice(Decimal openPrice) {
+			this.openPrice = openPrice;
+		}
+
+		public Decimal getHighPrice() {
+			return highPrice;
+		}
+
+		public void setHighPrice(Decimal highPrice) {
+			this.highPrice = highPrice;
+		}
+
+		public Decimal getLowPrice() {
+			return lowPrice;
+		}
+
+		public void setLowPrice(Decimal lowPrice) {
+			this.lowPrice = lowPrice;
+		}
+
+		public Decimal getClosePrice() {
+			return closePrice;
+		}
+
+		public void setClosePrice(Decimal closePrice) {
+			this.closePrice = closePrice;
+		}
+
+		public Decimal getVolume() {
+			return volume;
+		}
+
+		public void setVolume(Decimal volume) {
+			this.volume = volume;
+		}
+
+		public DateTime getEndDateTime() {
+			return endDateTime;
+		}
+
+		public void setEndDateTime(DateTime endDateTime) {
+			this.endDateTime = endDateTime;
+		}
 	}
 }

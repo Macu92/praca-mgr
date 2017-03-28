@@ -1,6 +1,5 @@
 package pl.com.stock.work.util;
 
-import java.time.format.DateTimeParseException;
 import java.util.List;
 
 import org.joda.time.DateTime;

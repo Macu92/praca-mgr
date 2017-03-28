@@ -2,9 +2,11 @@ package pl.com.stock.work.model;
 
 import org.joda.time.DateTime;
 
+import eu.verdelhan.ta4j.Decimal;
+
 public class StockRecord {
 	private DateTime date;
-	private Double priceValue;
+	private Decimal priceValue;
 	
 	public DateTime getDate() {
 		return date;
@@ -12,10 +14,10 @@ public class StockRecord {
 	public void setDate(DateTime date) {
 		this.date = date;
 	}
-	public Double getPriceValue() {
+	public Decimal getPriceValue() {
 		return priceValue;
 	}
-	public void setPriceValue(Double priceValue) {
+	public void setPriceValue(Decimal priceValue) {
 		this.priceValue = priceValue;
 	}
 	

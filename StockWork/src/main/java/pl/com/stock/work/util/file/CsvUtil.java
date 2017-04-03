@@ -71,17 +71,36 @@ public class CsvUtil {
 			for (Indicator indicator : indicators) {
 				headers.add(indicator.getClass().getSimpleName());
 			}
-			headers.add("futureVale");
+			// headers.add("futureVale");
+			headers.add("futureVale2");
 			csvFilePrinter.printRecord(headers);
-			
+
 			LinkedList<String> values;
-			for (int i = 0; i <= indicators[0].getTimeSeries().getEnd()-5; i++) {
+			for (int i = 0; i <= indicators[0].getTimeSeries().getEnd() - 5; i++) {
 				values = new LinkedList<String>();
 				values.add(indicators[0].getTimeSeries().getTick(i).getClosePrice().toString());
 				for (Indicator indicator : indicators) {
-					values.add(((Decimal)indicator.getValue(i)).toString());
+					Decimal v = (Decimal) indicator.getValue(i);
+					String s =((Decimal) indicator.getValue(i)).toString();
+					values.add(((Decimal) indicator.getValue(i)).toString());
 				}
-				values.add(indicators[0].getTimeSeries().getTick(i+5).getClosePrice().toString());
+				// values.add(indicators[0].getTimeSeries().getTick(i+5).getClosePrice().toString());
+				// if(indicators[0].getTimeSeries().getTick(i+5).getClosePrice().isGreaterThan(indicators[0].getTimeSeries().getTick(i).getClosePrice())){
+//				if (((Decimal) indicators[0].getValue(i)).isLessThan(Decimal.valueOf(20))) {
+//					values.add("up");
+//				} else if (((Decimal) indicators[0].getValue(i)).isGreaterThan(Decimal.valueOf(80))) {
+//					values.add("down");
+//				} else {
+//					values.add("no");
+//				}
+				
+				if (indicators[0].getTimeSeries().getTick(i+5).getClosePrice().isGreaterThan(indicators[0].getTimeSeries().getTick(i).getClosePrice())&&((Decimal) indicators[0].getValue(i)).isLessThan(Decimal.valueOf(20))) {
+					values.add("up");
+				} else if (indicators[0].getTimeSeries().getTick(i+5).getClosePrice().isLessThanOrEqual(indicators[0].getTimeSeries().getTick(i).getClosePrice())&&((Decimal) indicators[0].getValue(i)).isGreaterThan(Decimal.valueOf(80))) {
+					values.add("down");
+				} else {
+					values.add("no");
+				}
 				writeLine(fileWriter, values);
 				// csvFilePrinter.printRecord(indicator.getValue(i));
 			}

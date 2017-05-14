@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+	layout:decorate="~{layouts/layout}">
+
+<head>
+<title>Hello Spring Boot!</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<link
+	href="http://cdn.jsdelivr.net/webjars/bootstrap/3.3.6/css/bootstrap.min.css"
+	th:href="@{/webjars/bootstrap/3.3.6/css/bootstrap.min.css}"
+	rel="stylesheet" media="screen" />
+<link href="../static/css/core.css" th:href="@{/css/core.css}"
+	rel="stylesheet" media="screen" />
+<script src="http://cdn.jsdelivr.net/webjars/jquery/2.2.1/jquery.min.js"
+	th:src="@{/webjars/jquery/2.2.1/jquery.min.js}"></script>
+</head>
+<body>
+	<!-- Header -->
+	<h1>Admin page</h1>
+	<nav>
+		<ol>
+			<li><a href="/admin-panel/files">Ulopad trainig data</a></li>
+			<li><a href="/admin-panel/classifiers">add/update classifier</a></li>
+			<li><a href="#">evaluation result</a></li>
+			<li><a href="#">Make evalations for ever avaliable
+					classifier</a></li>
+		</ol>
+	</nav>
+	<div th:if="${message}">
+		<h2 th:text="${message}" />
+	</div>
+
+	<div>
+		<form method="POST" enctype="multipart/form-data" action="/admin-panel/files">
+			<table>
+				<tr>
+					<td>File to upload:</td>
+					<td><input type="file" name="file" /></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td><input type="submit" value="Upload" /></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+
+	<div>
+		<ul>
+			<li th:each="file : ${files}"><a th:href="${file}"
+				th:text="${file}" /></li>
+		</ul>
+	</div>
+
+</body>
+</html>

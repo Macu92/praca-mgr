@@ -9,6 +9,7 @@ import java.io.Writer;
 import java.time.format.DateTimeParseException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVPrinter;
@@ -65,7 +66,7 @@ public class CsvUtil {
 			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
 			// Create CSV file header
 
-			List<String> headers = new LinkedList<>();
+			List<String> headers = new LinkedList<String>();
 			headers.add("priceValue");
 
 			for (Indicator indicator : indicators) {
@@ -80,23 +81,28 @@ public class CsvUtil {
 				values = new LinkedList<String>();
 				values.add(indicators[0].getTimeSeries().getTick(i).getClosePrice().toString());
 				for (Indicator indicator : indicators) {
-					Decimal v = (Decimal) indicator.getValue(i);
-					String s =((Decimal) indicator.getValue(i)).toString();
 					values.add(((Decimal) indicator.getValue(i)).toString());
 				}
 				// values.add(indicators[0].getTimeSeries().getTick(i+5).getClosePrice().toString());
 				// if(indicators[0].getTimeSeries().getTick(i+5).getClosePrice().isGreaterThan(indicators[0].getTimeSeries().getTick(i).getClosePrice())){
-//				if (((Decimal) indicators[0].getValue(i)).isLessThan(Decimal.valueOf(20))) {
-//					values.add("up");
-//				} else if (((Decimal) indicators[0].getValue(i)).isGreaterThan(Decimal.valueOf(80))) {
-//					values.add("down");
-//				} else {
-//					values.add("no");
-//				}
-				
-				if (indicators[0].getTimeSeries().getTick(i+5).getClosePrice().isGreaterThan(indicators[0].getTimeSeries().getTick(i).getClosePrice())&&((Decimal) indicators[0].getValue(i)).isLessThan(Decimal.valueOf(20))) {
+				// if (((Decimal)
+				// indicators[0].getValue(i)).isLessThan(Decimal.valueOf(20))) {
+				// values.add("up");
+				// } else if (((Decimal)
+				// indicators[0].getValue(i)).isGreaterThan(Decimal.valueOf(80)))
+				// {
+				// values.add("down");
+				// } else {
+				// values.add("no");
+				// }
+
+				if (indicators[0].getTimeSeries().getTick(i + 5).getClosePrice()
+						.isGreaterThan(indicators[0].getTimeSeries().getTick(i).getClosePrice())){
+//						&& ((Decimal) indicators[0].getValue(i)).isLessThan(Decimal.valueOf(20))) {
 					values.add("up");
-				} else if (indicators[0].getTimeSeries().getTick(i+5).getClosePrice().isLessThanOrEqual(indicators[0].getTimeSeries().getTick(i).getClosePrice())&&((Decimal) indicators[0].getValue(i)).isGreaterThan(Decimal.valueOf(80))) {
+				} else if (indicators[0].getTimeSeries().getTick(i + 5).getClosePrice()
+						.isLessThanOrEqual(indicators[0].getTimeSeries().getTick(i).getClosePrice())){
+						//&& ((Decimal) indicators[0].getValue(i)).isGreaterThan(Decimal.valueOf(80))) {
 					values.add("down");
 				} else {
 					values.add("no");
@@ -104,6 +110,44 @@ public class CsvUtil {
 				writeLine(fileWriter, values);
 				// csvFilePrinter.printRecord(indicator.getValue(i));
 			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+
+	public <T> void writeMapToFile(String path, Map<String, List<Object>> map) {
+		FileWriter fileWriter = null;
+
+		CSVPrinter csvFilePrinter = null;
+
+		// Create the CSVFormat object with "\n" as a record delimiter
+		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
+		// initialize FileWriter object
+		try {
+			fileWriter = new FileWriter(path + "/fileMapValues2.csv");
+
+			// initialize CSVPrinter object
+			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);
+			// Create CSV file header
+
+			List<String> headers = new LinkedList<String>();
+
+			for (String key : map.keySet()) {
+				headers.add(key);
+			}
+			
+			csvFilePrinter.printRecord(headers);
+
+			LinkedList<String> values;
+			for (int i = 0; i <= map.get(headers.get(0)).size()-1; i++) {
+				values = new LinkedList<String>();
+				for (String key : map.keySet()) {
+					values.add(map.get(key).get(i).toString());
+				}
+				writeLine(fileWriter, values);
+			}
+//			writeLine(fileWriter, values); moze dopisanie lini usunie problem z niepelna ostatnia
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

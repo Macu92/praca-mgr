@@ -48,4 +48,11 @@ public class StockDataSet {
 	public void setCurrency(String currency) {
 		this.currency = currency;
 	}
+	
+	public StockDataSet append(StockDataSet data){
+		for(StockRecord record: data.getRecords()){
+			records.add(record);
+		}
+		return this;
+	}
 }

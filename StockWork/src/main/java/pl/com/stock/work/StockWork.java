@@ -57,11 +57,10 @@ public class StockWork {
 		RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi,cci,bbu,bbl);
 		rsiPrem.setBbMiddle(bbm);
 		rsiPrem.setMacd(macd);
-		Map<String, List<Object>> map = rsiPrem.createIndicatorsScaledSignalsMap(5);//rsiPrem.createIndicatorValuesMap(5);
+		Map<String, List<Object>> map = rsiPrem.createMixedindicatorsMap(5);//rsiPrem.createIndicatorValuesMap(5);
 		
 //		csv.writeToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", rsi, cci, bbu,bbm, bbl, macd);
 		csv.writeMapToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", map);
-		System.out.println(rsiPrem.getHighest()+" h || "+ rsiPrem.getLowest());
 		System.out.println("end");
 	}
 

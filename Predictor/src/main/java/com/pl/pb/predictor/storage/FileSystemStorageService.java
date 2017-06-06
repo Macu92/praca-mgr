@@ -76,6 +76,11 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
+    public void deleteFile(String filename) {
+        FileSystemUtils.deleteRecursively(load(filename).toFile());
+    }
+
+    @Override
     public void init() {
         try {
             Files.createDirectory(rootLocation);

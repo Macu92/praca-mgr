@@ -8,6 +8,6 @@ public class AdminPanelCotnroller {
 
 	@GetMapping("/admin-panel")
 	public String adminPanel(){
-		return "admin-panel";
+		return "admin/admin-panel";
 	}
 }

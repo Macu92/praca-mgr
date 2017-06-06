@@ -48,10 +48,13 @@
 
 	<div>
 		<ul>
-			<li th:each="file : ${files}"><a th:href="${file}"
-				th:text="${file}" /></li>
+			<li th:each="entry : ${files.entrySet()}">
+				<a th:href="${entry.getValue()}"
+				   th:text="${entry.getValue()}" /> <a th:href="@{/admin-panel/files/delete/}+${entry.getKey()}"
+										  th:text="delete" />
+			</li>
 		</ul>
 	</div>
-
+<!---->
 </body>
 </html>

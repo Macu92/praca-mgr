@@ -5,7 +5,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import eu.verdelhan.ta4j.Decimal;
+import eu.verdelhan.ta4j.Tick;
 import eu.verdelhan.ta4j.TimeSeries;
 import eu.verdelhan.ta4j.indicators.trackers.MACDIndicator;
 import eu.verdelhan.ta4j.indicators.trackers.bollinger.BollingerBandsLowerIndicator;
@@ -195,12 +197,62 @@ public class RsiPremiumStrategy {
 		return indicatorsValuesMap;
 	}
 
-	public Map<String, List<Object>> createEqualDecisionNumberList(int predictionTimeMinutes) {
-		Map<String, List<Object>> indicatorsValuesMap = createIndicatorsSignalsMap(predictionTimeMinutes);
-		for (int i = 0; i <= indicatorsValuesMap.get("CloseValue").size() - 1; i++) {
-			// if(indicatorsValuesMap.get)
+	public Map<String, List<Object>> dataSetVol3(int predictionTimeMinutes) {
+		Map<String, List<Object>> indicatorsValuesMap = new LinkedHashMap<>();
+		List<Object> priceBodyValue = new LinkedList<>();
+		List<Object> priceUpperShadow = new LinkedList<>();
+		List<Object> priceDownShadow = new LinkedList<>();
+		List<Object> isBullish = new LinkedList<>(); //positice candle
+		List<Object> isBearish = new LinkedList<>(); //negative candle
+		List<Object> bbuValues = new LinkedList<>();
+		List<Object> bbmValues = new LinkedList<>();
+		List<Object> bblValues = new LinkedList<>();
+		List<Object> cciChannelBreakSignalList = new LinkedList<>();
+		List<Object> rsiOverBoughtOrSoldSignalList = new LinkedList<>();
+		List<Object> bbBreakSignalList = new LinkedList<>();
+		List<Object> macdValues = new LinkedList<>();
+		List<Object> predictionVal = new LinkedList<>();
+
+		TimeSeries ts = rsi.getTimeSeries();
+		for (int i = 0; i < ts.getEnd() - predictionTimeMinutes; i++) {
+			priceBodyValue.add(getCandleBody(ts.getTick(i)));
+			priceUpperShadow.add(getUpShadow(ts.getTick(i)));
+			priceDownShadow.add(getDownShadow(ts.getTick(i)));
+			isBullish.add(getBinaryBoolean(ts.getTick(i).isBullish()));
+			isBearish.add(getBinaryBoolean(ts.getTick(i).isBearish()));
+			bbuValues.add(bbUpper.getValue(i));
+			bbmValues.add(bbMiddle.getValue(i));
+			bblValues.add(bbLower.getValue(i));
+			macdValues.add(macd.getValue(i));
+			if (ts.getTick(i + predictionTimeMinutes).getClosePrice().isGreaterThan(ts.getTick(i).getClosePrice())) {
+				predictionVal.add("up");
+			} else if (ts.getTick(i + predictionTimeMinutes).getClosePrice()
+					.isLessThan(ts.getTick(i).getClosePrice())) {
+				predictionVal.add("down");
+			} else {
+				predictionVal.add("no");
+			}
+
+			rsiOverBoughtOrSoldSignalList.add(makeRsiSignal(rsi.getValue(i)).toString());
+			cciChannelBreakSignalList.add(makeCCiSignal(cci.getValue(i)).toString());
+			bbBreakSignalList.add(
+					makeBbSignal(bbUpper.getValue(i), bbLower.getValue(i), ts.getTick(i).getClosePrice()).toString());
 		}
 
+
+		indicatorsValuesMap.put("Candle body", priceBodyValue);
+		indicatorsValuesMap.put("Upper shadow", priceUpperShadow);
+		indicatorsValuesMap.put("Lower shadow", priceDownShadow);
+		indicatorsValuesMap.put("is Bullish", isBullish);
+		indicatorsValuesMap.put("is Bearish", isBearish);
+		indicatorsValuesMap.put(bbUpper.getClass().getSimpleName(), bbuValues);
+		indicatorsValuesMap.put(bbMiddle.getClass().getSimpleName(), bbmValues);
+		indicatorsValuesMap.put(bbLower.getClass().getSimpleName(), bblValues);
+		indicatorsValuesMap.put("RSI OVERBOUGHT OR SOLD", rsiOverBoughtOrSoldSignalList);
+		indicatorsValuesMap.put("CCI CHANNEL BREAK", cciChannelBreakSignalList);
+		indicatorsValuesMap.put("BB BREAK", bbBreakSignalList);
+		indicatorsValuesMap.put(macd.getClass().getSimpleName(), macdValues);
+		indicatorsValuesMap.put("Prediction", predictionVal);
 		return indicatorsValuesMap;
 	}
 
@@ -325,5 +377,21 @@ public class RsiPremiumStrategy {
 			return 0;
 		}
 	}
+
+	private Decimal getCandleBody(Tick tick){
+		return tick.getOpenPrice().minus(tick.getClosePrice()).abs();
+	}
+
+	private Decimal getUpShadow(Tick tick){
+		return tick.getMaxPrice().minus(tick.getOpenPrice()).abs();
+	}
+	private Decimal getDownShadow(Tick tick){
+		return tick.getMinPrice().minus(tick.getClosePrice()).abs();
+	}
+
+	private Integer getBinaryBoolean(boolean bool){
+		return Boolean.valueOf(bool).compareTo(true);
+	}
+
 
 }

@@ -116,7 +116,7 @@ public class CsvUtil {
 		}
 	}
 
-	public <T> void writeMapToFile(String path, Map<String, List<Object>> map) {
+	public <T> void writeMapToFile(String path,String name, Map<String, List<Object>> map) {
 		FileWriter fileWriter = null;
 
 		CSVPrinter csvFilePrinter = null;
@@ -125,7 +125,7 @@ public class CsvUtil {
 		CSVFormat csvFileFormat = CSVFormat.DEFAULT.withRecordSeparator(NEW_LINE_SEPARATOR);
 		// initialize FileWriter object
 		try {
-			fileWriter = new FileWriter(path + "/fileMapValues2.csv");
+			fileWriter = new FileWriter(path + "/"+name);
 
 			// initialize CSVPrinter object
 			csvFilePrinter = new CSVPrinter(fileWriter, csvFileFormat);

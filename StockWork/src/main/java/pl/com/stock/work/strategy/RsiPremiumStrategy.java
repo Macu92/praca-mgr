@@ -203,15 +203,19 @@ public class RsiPremiumStrategy {
 		List<Object> priceUpperShadow = new LinkedList<>();
 		List<Object> priceDownShadow = new LinkedList<>();
 		List<Object> isBullish = new LinkedList<>(); //positice candle
-		List<Object> isBearish = new LinkedList<>(); //negative candle
+//		List<Object> isBearish = new LinkedList<>(); //negative candle
 		List<Object> bbuValues = new LinkedList<>();
 		List<Object> bbmValues = new LinkedList<>();
 		List<Object> bblValues = new LinkedList<>();
 		List<Object> cciChannelBreakSignalList = new LinkedList<>();
 		List<Object> rsiOverBoughtOrSoldSignalList = new LinkedList<>();
+		List<Object> rsiExtremeSignalScaledList = new LinkedList<>();
+		List<Object> cciBreakScaledList = new LinkedList<>();
 		List<Object> bbBreakSignalList = new LinkedList<>();
 		List<Object> macdValues = new LinkedList<>();
 		List<Object> predictionVal = new LinkedList<>();
+		List<Object> rsiValues = new LinkedList<>();
+		List<Object> cciValues = new LinkedList<>();
 
 		TimeSeries ts = rsi.getTimeSeries();
 		for (int i = 0; i < ts.getEnd() - predictionTimeMinutes; i++) {
@@ -219,11 +223,12 @@ public class RsiPremiumStrategy {
 			priceUpperShadow.add(getUpShadow(ts.getTick(i)));
 			priceDownShadow.add(getDownShadow(ts.getTick(i)));
 			isBullish.add(getBinaryBoolean(ts.getTick(i).isBullish()));
-			isBearish.add(getBinaryBoolean(ts.getTick(i).isBearish()));
 			bbuValues.add(bbUpper.getValue(i));
 			bbmValues.add(bbMiddle.getValue(i));
 			bblValues.add(bbLower.getValue(i));
 			macdValues.add(macd.getValue(i));
+			rsiValues.add(scaleRsiValue(rsi.getValue(i)).toString());
+			cciValues.add(scaleCCiValue(cci.getValue(i)).toString());
 			if (ts.getTick(i + predictionTimeMinutes).getClosePrice().isGreaterThan(ts.getTick(i).getClosePrice())) {
 				predictionVal.add("up");
 			} else if (ts.getTick(i + predictionTimeMinutes).getClosePrice()
@@ -233,8 +238,10 @@ public class RsiPremiumStrategy {
 				predictionVal.add("no");
 			}
 
+			rsiExtremeSignalScaledList.add(makeRsiScaledSignal(rsi.getValue(i)).toString());
+			cciChannelBreakSignalList.add(makeCciScaledSignal(cci.getValue(i)).toString());
 			rsiOverBoughtOrSoldSignalList.add(makeRsiSignal(rsi.getValue(i)).toString());
-			cciChannelBreakSignalList.add(makeCCiSignal(cci.getValue(i)).toString());
+			cciBreakScaledList.add(makeCCiSignal(cci.getValue(i)).toString());
 			bbBreakSignalList.add(
 					makeBbSignal(bbUpper.getValue(i), bbLower.getValue(i), ts.getTick(i).getClosePrice()).toString());
 		}
@@ -244,22 +251,54 @@ public class RsiPremiumStrategy {
 		indicatorsValuesMap.put("Upper shadow", priceUpperShadow);
 		indicatorsValuesMap.put("Lower shadow", priceDownShadow);
 		indicatorsValuesMap.put("is Bullish", isBullish);
-		indicatorsValuesMap.put("is Bearish", isBearish);
-		indicatorsValuesMap.put(bbUpper.getClass().getSimpleName(), bbuValues);
-		indicatorsValuesMap.put(bbMiddle.getClass().getSimpleName(), bbmValues);
-		indicatorsValuesMap.put(bbLower.getClass().getSimpleName(), bblValues);
-		indicatorsValuesMap.put("RSI OVERBOUGHT OR SOLD", rsiOverBoughtOrSoldSignalList);
+		indicatorsValuesMap.put("BBU", bbuValues);
+		indicatorsValuesMap.put("BBM", bbmValues);
+		indicatorsValuesMap.put("BBL", bblValues);
+		indicatorsValuesMap.put("BB BREAK SCALED", bbBreakSignalList);
+		indicatorsValuesMap.put("RSI", rsiValues);
+		indicatorsValuesMap.put("RSI EXTREME TOUCHED", rsiOverBoughtOrSoldSignalList);
+		indicatorsValuesMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
+		indicatorsValuesMap.put("CCI", cciValues);
 		indicatorsValuesMap.put("CCI CHANNEL BREAK", cciChannelBreakSignalList);
-		indicatorsValuesMap.put("BB BREAK", bbBreakSignalList);
+		indicatorsValuesMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
 		indicatorsValuesMap.put(macd.getClass().getSimpleName(), macdValues);
 		indicatorsValuesMap.put("Prediction", predictionVal);
 		return indicatorsValuesMap;
 	}
 
 	private Integer makeRsiSignal(Decimal rsiValue) {
-		if (rsi.getOverBoughtLevel().isGreaterThanOrEqual(rsiValue)) {
+		if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel())) {
 			return 1;
-		} else if (rsi.getOverSoldLevel().isLessThanOrEqual(rsiValue)) {
+		} else if (rsiValue.isLessThanOrEqual(rsi.getOverSoldLevel())) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+
+	private Integer makeRsiScaledSignal(Decimal rsiValue) {
+		if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel())) {
+			if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel().plus(rsi.getOverBoughtLevel().multipliedBy(Decimal.valueOf(0.2))))) {
+				return 2;
+			}else if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel().plus(rsi.getOverBoughtLevel().multipliedBy(Decimal.valueOf(0.4))))) {
+				return 3;
+			}else if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel().plus(rsi.getOverBoughtLevel().multipliedBy(Decimal.valueOf(0.6))))) {
+				return 4;
+			}else if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel().plus(rsi.getOverBoughtLevel().multipliedBy(Decimal.valueOf(0.8))))) {
+				return 5;
+			}else{
+				return 1;
+			}
+		} else if (rsiValue.isLessThanOrEqual(rsi.getOverSoldLevel())) {
+			if (rsiValue.isLessThanOrEqual(rsi.getOverSoldLevel().minus(rsi.getOverSoldLevel().multipliedBy(Decimal.valueOf(0.2))))){
+				return -2;
+			} else if (rsiValue.isLessThanOrEqual(rsi.getOverSoldLevel().minus(rsi.getOverSoldLevel().multipliedBy(Decimal.valueOf(0.4))))){
+				return -3;
+			} else if (rsiValue.isLessThanOrEqual(rsi.getOverSoldLevel().minus(rsi.getOverSoldLevel().multipliedBy(Decimal.valueOf(0.6))))){
+				return -4;
+			} else if (rsiValue.isLessThanOrEqual(rsi.getOverSoldLevel().minus(rsi.getOverSoldLevel().multipliedBy(Decimal.valueOf(0.8))))){
+				return -5;
+			}
 			return -1;
 		} else {
 			return 0;
@@ -267,9 +306,38 @@ public class RsiPremiumStrategy {
 	}
 
 	private Integer makeCCiSignal(Decimal rsiValue) {
-		if (cci.getHighMeasuredAverageLevel().isGreaterThanOrEqual(rsiValue)) {
+		if (rsiValue.isGreaterThanOrEqual(cci.getHighMeasuredAverageLevel())) {
 			return 1;
-		} else if (cci.getLowMeasuredAverageLevel().isLessThanOrEqual(rsiValue)) {
+		} else if (rsiValue.isLessThanOrEqual(cci.getLowMeasuredAverageLevel())) {
+			return -1;
+		} else {
+			return 0;
+		}
+	}
+
+	private Integer makeCciScaledSignal(Decimal cciValue) {
+		if (cciValue.isGreaterThanOrEqual(cci.getHighMeasuredAverageLevel())) {
+			if (cciValue.isGreaterThanOrEqual(cci.getHighMeasuredAverageLevel().plus(cci.getHighMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.2))))) {
+				return 2;
+			}else if (cciValue.isGreaterThanOrEqual(cci.getHighMeasuredAverageLevel().plus(cci.getHighMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.4))))) {
+				return 3;
+			}else if (cciValue.isGreaterThanOrEqual(cci.getHighMeasuredAverageLevel().plus(cci.getHighMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.6))))) {
+				return 4;
+			}else if (cciValue.isGreaterThanOrEqual(cci.getHighMeasuredAverageLevel().plus(cci.getHighMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.8))))) {
+				return 5;
+			}else{
+				return 1;
+			}
+		} else if (cciValue.isLessThanOrEqual(cci.getLowMeasuredAverageLevel())) {
+			if (cciValue.isLessThanOrEqual(cci.getLowMeasuredAverageLevel().minus(cci.getLowMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.2))))){
+				return -2;
+			} else if (cciValue.isLessThanOrEqual(cci.getLowMeasuredAverageLevel().minus(cci.getLowMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.4))))){
+				return -3;
+			} else if (cciValue.isLessThanOrEqual(cci.getLowMeasuredAverageLevel().minus(cci.getLowMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.6))))){
+				return -4;
+			} else if (cciValue.isLessThanOrEqual(cci.getLowMeasuredAverageLevel().minus(cci.getLowMeasuredAverageLevel().multipliedBy(Decimal.valueOf(0.8))))){
+				return -5;
+			}
 			return -1;
 		} else {
 			return 0;
@@ -281,6 +349,28 @@ public class RsiPremiumStrategy {
 			return 1;
 		} else if (priceValue.isLessThanOrEqual(bblValue)) {
 			return -1;
+		} else {
+			return 0;
+		}
+	}
+
+	private Integer makeScaledBbSignal(Decimal bbuValue, Decimal bblValue, Decimal priceValue) {
+		if (priceValue.isGreaterThan(bbuValue.plus(bbuValue.multipliedBy(Decimal.valueOf(0.0001))))){
+			return 2;
+		} else if (priceValue.isGreaterThan(bbuValue.plus(bbuValue.multipliedBy(Decimal.valueOf(0.0002))))){
+			return 3;
+		} else if (priceValue.isGreaterThan(bbuValue.plus(bbuValue.multipliedBy(Decimal.valueOf(0.0003))))){
+			return 4;
+		} else if (priceValue.isGreaterThan(bbuValue.plus(bbuValue.multipliedBy(Decimal.valueOf(0.0004))))){
+			return 5;
+		} else if (priceValue.isLessThanOrEqual(bblValue.minus(bblValue.multipliedBy(Decimal.valueOf(0.0001))))){
+			return -2;
+		} else if (priceValue.isLessThanOrEqual(bblValue.minus(bblValue.multipliedBy(Decimal.valueOf(0.0002))))){
+			return -3;
+		} else if (priceValue.isLessThanOrEqual(bblValue.minus(bblValue.multipliedBy(Decimal.valueOf(0.0003))))){
+			return -4;
+		} else if (priceValue.isLessThanOrEqual(bblValue.minus(bblValue.multipliedBy(Decimal.valueOf(0.0004))))){
+			return -5;
 		} else {
 			return 0;
 		}

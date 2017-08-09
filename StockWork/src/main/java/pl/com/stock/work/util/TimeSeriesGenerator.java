@@ -29,10 +29,7 @@ public class TimeSeriesGenerator {
 				mutableTick.setClosePrice(record.getPriceValue());
 			} else {
 				if (mutableTick != null) {
-					Tick tick = new Tick(mutableTick.getPeriod(), mutableTick.getEndDateTime(),
-							mutableTick.getOpenPrice(), mutableTick.getHighPrice(), mutableTick.getLowPrice(),
-							mutableTick.getClosePrice(), mutableTick.getVolume());
-					tickList.add(tick);
+					tickList.add(createTick(mutableTick));
 				}
 				DateTime time = new DateTime(record.getDate().getYear(), record.getDate().getMonthOfYear(),
 						record.getDate().getDayOfMonth(), record.getDate().getHourOfDay(),
@@ -41,11 +38,14 @@ public class TimeSeriesGenerator {
 						record.getPriceValue(), record.getPriceValue(), Decimal.valueOf(0));
 			}
 		}
-		Tick tick = new Tick(mutableTick.getPeriod(), mutableTick.getEndDateTime(),
+		tickList.add(createTick(mutableTick));
+		return new TimeSeries(tickList);
+	}
+
+	private Tick createTick(MutableTick mutableTick){
+		return new Tick(mutableTick.getPeriod(), mutableTick.getEndDateTime(),
 				mutableTick.getOpenPrice(), mutableTick.getHighPrice(), mutableTick.getLowPrice(),
 				mutableTick.getClosePrice(), mutableTick.getVolume());
-		tickList.add(tick);
-		return new TimeSeries(tickList);
 	}
 
 	private class MutableTick {

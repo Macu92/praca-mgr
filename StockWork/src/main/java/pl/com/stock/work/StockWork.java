@@ -27,16 +27,16 @@ public class StockWork {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		CsvUtil csv = new CsvUtil();
-		StockDataSet set = csv.readFile("/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week1.csv");
-//				"C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week1.csv");
-		set = set.append(csv.readFile("/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week2.csv"));
-//				"C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week2.csv"));
-		set = set.append(csv.readFile("/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week3.csv"));
-//				"C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week3.csv"));
-		set = set.append(csv.readFile("/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week4.csv"));
-//				"C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week4.csv"));
-		set = set.append(csv.readFile("/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week5.csv"));
-//				"C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week5.csv"));
+		StockDataSet set = csv.readFile(//"/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week1.csv");
+				"F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week1.csv");
+		set = set.append(csv.readFile(//"/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week2.csv"));
+				"F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week2.csv"));
+		set = set.append(csv.readFile(//"/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week3.csv"));
+				"F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week3.csv"));
+		set = set.append(csv.readFile(//"/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week4.csv"));
+				"F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week4.csv"));
+		set = set.append(csv.readFile(//"/home/maciej/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week5.csv"));
+				"F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week5.csv"));
 		TimeSeries ts = new TimeSeriesGenerator().generateTimeSeries(set, 1);
 		ClosePriceIndicator closePrice = new ClosePriceIndicator(ts);
 //		RSIIndicator rsi = new RSIIndicator(closePrice, 14);
@@ -61,7 +61,7 @@ public class StockWork {
 		
 //		csv.writeToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", rsi, cci, bbu,bbm, bbl, macd);
 //		csv.writeMapToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", map);
-		csv.writeMapToFile("/home/maciej/dev-workspace/UCZELNIA/praca-mgr/generowaneDane", "dataVol3-basicInfoAdded", map);
+		csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane", "dataVol6-all.csv", map);
 		System.out.println("end");
 	}
 

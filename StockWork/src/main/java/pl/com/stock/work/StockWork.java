@@ -42,8 +42,8 @@ public class StockWork {
 //		RSIIndicator rsi = new RSIIndicator(closePrice, 14);
 //		CCIIndicator cci = new CCIIndicator(ts, 20);
 
-		SMAIndicator sma = new SMAIndicator(closePrice, 20);
-		StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, 20);
+		SMAIndicator sma = new SMAIndicator(closePrice, 23);
+		StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, l);
 		BollingerBandsMiddleIndicator bbm = new BollingerBandsMiddleIndicator(sma);
 		BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.5));
 		BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.5));
@@ -57,12 +57,12 @@ public class StockWork {
 		RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi,cci,bbu,bbl);
 		rsiPrem.setBbMiddle(bbm);
 		rsiPrem.setMacd(macd);
-		Map<String, List<Object>> map = rsiPrem.dataSetVol3(5);//rsiPrem.createIndicatorValuesMap(5);
+		Map<String, List<Object>> map = rsiPrem.genBestDataSet(5);//rsiPrem.createIndicatorValuesMap(5);
 		
 //		csv.writeToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", rsi, cci, bbu,bbm, bbl, macd);
 //		csv.writeMapToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", map);
-		csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane", "dataVol6-all.csv", map);
+		csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane", "best-data-2.0.csv", map);
 		System.out.println("end");
-	}
+	}    
 
 }

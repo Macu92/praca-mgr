@@ -266,6 +266,52 @@ public class RsiPremiumStrategy {
 		return indicatorsValuesMap;
 	}
 
+	public Map<String, List<Object>> genBestDataSet(int predictionTimeMinutes) {
+		Map<String, List<Object>> indicatorsValuesMap = new LinkedHashMap<>();
+		List<Object> bbuValues = new LinkedList<>();
+		List<Object> bbmValues = new LinkedList<>();
+		List<Object> bblValues = new LinkedList<>();
+		List<Object> rsiExtremeSignalScaledList = new LinkedList<>();
+		List<Object> cciBreakScaledList = new LinkedList<>();
+		List<Object> macdValues = new LinkedList<>();
+		List<Object> predictionVal = new LinkedList<>();
+		List<Object> rsiValues = new LinkedList<>();
+		List<Object> cciValues = new LinkedList<>();
+
+		TimeSeries ts = rsi.getTimeSeries();
+		for (int i = 0; i < ts.getEnd() - predictionTimeMinutes; i++) {
+			bbuValues.add(bbUpper.getValue(i));
+			bbmValues.add(bbMiddle.getValue(i));
+			bblValues.add(bbLower.getValue(i));
+			macdValues.add(macd.getValue(i));
+			rsiValues.add(scaleRsiValue(rsi.getValue(i)).toString());
+			cciValues.add(scaleCCiValue(cci.getValue(i)).toString());
+			if (ts.getTick(i + predictionTimeMinutes).getClosePrice().isGreaterThan(ts.getTick(i).getClosePrice())) {
+				predictionVal.add("up");
+			} else if (ts.getTick(i + predictionTimeMinutes).getClosePrice()
+					.isLessThan(ts.getTick(i).getClosePrice())) {
+				predictionVal.add("down");
+			} else {
+				predictionVal.add("no");
+			}
+
+			rsiExtremeSignalScaledList.add(makeRsiScaledSignal(rsi.getValue(i)).toString());
+			cciBreakScaledList.add(makeCCiSignal(cci.getValue(i)).toString());
+		}
+
+		indicatorsValuesMap.put("BBU", bbuValues);
+		indicatorsValuesMap.put("BBM", bbmValues);
+		indicatorsValuesMap.put("BBL", bblValues);
+		indicatorsValuesMap.put("RSI", rsiValues);
+		indicatorsValuesMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
+		indicatorsValuesMap.put("CCI", cciValues);
+		indicatorsValuesMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
+		indicatorsValuesMap.put(macd.getClass().getSimpleName(), macdValues);
+		indicatorsValuesMap.put("Prediction", predictionVal);
+		return indicatorsValuesMap;
+
+	}
+
 	private Integer makeRsiSignal(Decimal rsiValue) {
 		if (rsiValue.isGreaterThanOrEqual(rsi.getOverBoughtLevel())) {
 			return 1;

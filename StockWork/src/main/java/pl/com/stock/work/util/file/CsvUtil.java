@@ -147,6 +147,7 @@ public class CsvUtil {
 				}
 				writeLine(fileWriter, values);
 			}
+			fileWriter.close();
 //			writeLine(fileWriter, values); moze dopisanie lini usunie problem z niepelna ostatnia
 		} catch (IOException e) {
 			// TODO Auto-generated catch block

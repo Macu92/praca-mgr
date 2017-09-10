@@ -33,6 +33,11 @@
 			<version>1.16.16</version>
 			<scope>provided</scope>
 		</dependency>
+		<dependency>
+			<groupId>nz.ac.waikato.cms.weka</groupId>
+			<artifactId>weka-stable</artifactId>
+			<version>3.6.7</version>
+		</dependency>
 
 
 		<!-- TESTS -->

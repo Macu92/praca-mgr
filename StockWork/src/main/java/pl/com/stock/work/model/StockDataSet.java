@@ -30,7 +30,6 @@ public class StockDataSet {
 		strings.add(DateTimeFormat.forPattern(("yyyy-MM-dd HH:mm:ss.SSS")));
 		strings.add(DateTimeFormat.forPattern(("yyyy-MM-dd HH:mm:ss")));
 		return strings;
-		
 	}
 
 	public List<DateTimeFormatter > getDateFormats() {

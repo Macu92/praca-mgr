@@ -40,14 +40,14 @@ public class StockWork {
     public static void main(String[] args) {
         // TODO Auto-generated method stub
         csv = new CsvUtil();
-        StockDataSet set;
 //        CsvToArff converter = new CsvToArff();
 //        try {
-//                converter.convert("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/daily");
+//                converter.convert("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi");
 //        } catch (IOException e) {
 //            e.printStackTrace();
 //        }
-//
+//////
+        StockDataSet set;
         set = csv.readFile("F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week1.csv");
         set = set.append(csv.readFile("F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week2.csv"));
         set = set.append(csv.readFile("F:/dev-workspace/UCZELNIA/praca-mgr/StockWork/src/main/resources/trainData/Feb/EUR_USD_Week3.csv"));
@@ -72,13 +72,11 @@ public class StockWork {
 //        set = set.append(csv.readFile("F:/dev-workspace/dane/maj/EUR_USD_Week3.csv"));
 //        set = set.append(csv.readFile("F:/dev-workspace/dane/maj/EUR_USD_Week4.csv"));
 //        set = set.append(csv.readFile("F:/dev-workspace/dane/maj/EUR_USD_Week5.csv"));
-
         TimeSeries ts = new TimeSeriesGenerator().generateTimeSeries(set, 1);
-
 //        buildDailyData(ts);
 //        buildWeeklyData(ts);
 //        buildMonthlyData(ts);
-
+//
         buildSingleDocData(ts);
         System.out.println("end");
     }
@@ -88,20 +86,20 @@ public class StockWork {
         SMAIndicator sma = new SMAIndicator(closePrice, 20);
         StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, 20);
         BollingerBandsMiddleIndicator bbm = new BollingerBandsMiddleIndicator(sma);
-        BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.5));
-        BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.5));
+        BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.8));
+        BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.2));
 
-        RSI rsi = new RSI(Decimal.valueOf(20), Decimal.valueOf(80), closePrice, 16);
-        CCI cci = new CCI(ts, 21, Decimal.valueOf(160), Decimal.valueOf(-160));
+        RSI rsi = new RSI(Decimal.valueOf(30), Decimal.valueOf(70), closePrice, 14);
+        CCI cci = new CCI(ts, 20, Decimal.valueOf(150), Decimal.valueOf(-150));
 
 
-        EMAIndicator ema = new EMAIndicator(closePrice, 11);
-        MACDIndicator macd = new MACDIndicator(ema, 16, 28);
+        EMAIndicator ema = new EMAIndicator(closePrice, 16);
+        MACDIndicator macd = new MACDIndicator(ema, 16, 30);
 
         RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi, cci, bbu, bbl);
         rsiPrem.setBbMiddle(bbm);
         rsiPrem.setMacd(macd);;
-        Map<String, List<Object>> map = rsiPrem.genBestDataSetDaily(5);//rsiPrem.createIndicatorValuesMap(5);
+        Map<String, List<Object>> map = rsiPrem.genBestDataSetDaily(1);//rsiPrem.createIndicatorValuesMap(5);
 
     }
 
@@ -110,20 +108,20 @@ public class StockWork {
         SMAIndicator sma = new SMAIndicator(closePrice, 20);
         StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, 20);
         BollingerBandsMiddleIndicator bbm = new BollingerBandsMiddleIndicator(sma);
-        BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.5));
-        BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.5));
+        BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.8));
+        BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.2));
 
-        RSI rsi = new RSI(Decimal.valueOf(20), Decimal.valueOf(80), closePrice, 16);
-        CCI cci = new CCI(ts, 21, Decimal.valueOf(160), Decimal.valueOf(-160));
+        RSI rsi = new RSI(Decimal.valueOf(30), Decimal.valueOf(70), closePrice, 14);
+        CCI cci = new CCI(ts, 20, Decimal.valueOf(150), Decimal.valueOf(-150));
 
 
-        EMAIndicator ema = new EMAIndicator(closePrice, 11);
-        MACDIndicator macd = new MACDIndicator(ema, 16, 28);
+        EMAIndicator ema = new EMAIndicator(closePrice, 16);
+        MACDIndicator macd = new MACDIndicator(ema, 16, 30);
 
         RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi, cci, bbu, bbl);
         rsiPrem.setBbMiddle(bbm);
         rsiPrem.setMacd(macd);
-        Map<String, List<Object>> map = rsiPrem.genBestDataSetWeekly(5);//rsiPrem.createIndicatorValuesMap(5);
+        Map<String, List<Object>> map = rsiPrem.genBestDataSetWeekly(1);//rsiPrem.createIndicatorValuesMap(5);
 
     }
 
@@ -132,20 +130,20 @@ public class StockWork {
         SMAIndicator sma = new SMAIndicator(closePrice, 20);
         StandardDeviationIndicator sd = new StandardDeviationIndicator(closePrice, 20);
         BollingerBandsMiddleIndicator bbm = new BollingerBandsMiddleIndicator(sma);
-        BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.5));
-        BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.5));
+        BollingerBandsUpperIndicator bbu = new BollingerBandsUpperIndicator(bbm, sd, Decimal.valueOf(2.8));
+        BollingerBandsLowerIndicator bbl = new BollingerBandsLowerIndicator(bbm, sd, Decimal.valueOf(2.2));
 
-        RSI rsi = new RSI(Decimal.valueOf(20), Decimal.valueOf(80), closePrice, 16);
-        CCI cci = new CCI(ts, 21, Decimal.valueOf(160), Decimal.valueOf(-160));
+        RSI rsi = new RSI(Decimal.valueOf(30), Decimal.valueOf(70), closePrice, 14);
+        CCI cci = new CCI(ts, 20, Decimal.valueOf(150), Decimal.valueOf(-150));
 
 
-        EMAIndicator ema = new EMAIndicator(closePrice, 11);
-        MACDIndicator macd = new MACDIndicator(ema, 16, 28);
+        EMAIndicator ema = new EMAIndicator(closePrice, 16);
+        MACDIndicator macd = new MACDIndicator(ema, 16, 30);
 
         RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi, cci, bbu, bbl);
         rsiPrem.setBbMiddle(bbm);
         rsiPrem.setMacd(macd);
-        Map<String, List<Object>> map = rsiPrem.genBestDataSetMonthly(5);//rsiPrem.createIndicatorValuesMap(5);
+        Map<String, List<Object>> map = rsiPrem.genBestDataSetMonthly(1);//rsiPrem.createIndicatorValuesMap(5);
 
     }
 
@@ -170,10 +168,10 @@ public class StockWork {
         RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi, cci, bbu, bbl);
         rsiPrem.setBbMiddle(bbm);
         rsiPrem.setMacd(macd);
-        Map<String, List<Object>> map = rsiPrem.genBestDataSet(30);//rsiPrem.createIndicatorValuesMap(5);
+        Map<String, List<Object>> map = rsiPrem.genBestDataSet(5);//rsiPrem.createIndicatorValuesMap(5);
 //		csv.writeToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", rsi, cci, bbu,bbm, bbl, macd);
 //		csv.writeMapToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", map);
-        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/30-minCCi", "train.csv", map);
+        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE", "bestset-v1.csv", map);
     }
 
     private static Map<LocalDate, TimeSeries> generateDailyTimeSeries(TimeSeries timeSeries) {

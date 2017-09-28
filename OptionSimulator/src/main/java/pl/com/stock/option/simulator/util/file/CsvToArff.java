@@ -1,4 +1,4 @@
-package pl.com.stock.work.util.file;
+package pl.com.stock.option.simulator.util.file;
 
 import weka.core.Attribute;
 import weka.core.FastVector;

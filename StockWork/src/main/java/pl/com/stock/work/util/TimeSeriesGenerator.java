@@ -42,6 +42,60 @@ public class TimeSeriesGenerator {
 		return new TimeSeries(tickList);
 	}
 
+	public TimeSeries generateTimeSeries15min(StockDataSet dataSet, Integer interval) {
+		List<Tick> tickList = new LinkedList();
+		MutableTick mutableTick = null;
+		for (StockRecord record : dataSet.getRecords()) {
+			if (mutableTick != null
+//					&& mutableTick.getStartDateTime().getMinuteOfHour() == record.getDate().getMinuteOfHour()
+					&& Minutes.minutesBetween(mutableTick.getStartDateTime(), record.getDate()).getMinutes() < 15) {
+				mutableTick.setHighPrice(record.getPriceValue().isGreaterThan(mutableTick.getHighPrice())
+						? record.getPriceValue() : mutableTick.getHighPrice());
+				mutableTick.setLowPrice(record.getPriceValue().isLessThan(mutableTick.getLowPrice())
+						? record.getPriceValue() : mutableTick.getLowPrice());
+				mutableTick.setClosePrice(record.getPriceValue());
+			} else {
+				if (mutableTick != null) {
+					tickList.add(createTick(mutableTick));
+				}
+				DateTime time = new DateTime(record.getDate().getYear(), record.getDate().getMonthOfYear(),
+						record.getDate().getDayOfMonth(), record.getDate().getHourOfDay(),
+						record.getDate().getMinuteOfHour());
+				mutableTick = new MutableTick(Minutes.minutes(15).toPeriod(),time,time.plusMinutes(15), record.getPriceValue(), record.getPriceValue(),
+						record.getPriceValue(), record.getPriceValue(), Decimal.valueOf(0));
+			}
+		}
+		tickList.add(createTick(mutableTick));
+		return new TimeSeries(tickList);
+	}
+
+	public TimeSeries generateTimeSeries30min(StockDataSet dataSet, Integer interval) {
+		List<Tick> tickList = new LinkedList();
+		MutableTick mutableTick = null;
+		for (StockRecord record : dataSet.getRecords()) {
+			if (mutableTick != null
+//					&& mutableTick.getStartDateTime().getMinuteOfHour() == record.getDate().getMinuteOfHour()
+					&& Minutes.minutesBetween(mutableTick.getStartDateTime(), record.getDate()).getMinutes() < 30) {
+				mutableTick.setHighPrice(record.getPriceValue().isGreaterThan(mutableTick.getHighPrice())
+						? record.getPriceValue() : mutableTick.getHighPrice());
+				mutableTick.setLowPrice(record.getPriceValue().isLessThan(mutableTick.getLowPrice())
+						? record.getPriceValue() : mutableTick.getLowPrice());
+				mutableTick.setClosePrice(record.getPriceValue());
+			} else {
+				if (mutableTick != null) {
+					tickList.add(createTick(mutableTick));
+				}
+				DateTime time = new DateTime(record.getDate().getYear(), record.getDate().getMonthOfYear(),
+						record.getDate().getDayOfMonth(), record.getDate().getHourOfDay(),
+						record.getDate().getMinuteOfHour());
+				mutableTick = new MutableTick(Minutes.minutes(30).toPeriod(),time,time.plusMinutes(30), record.getPriceValue(), record.getPriceValue(),
+						record.getPriceValue(), record.getPriceValue(), Decimal.valueOf(0));
+			}
+		}
+		tickList.add(createTick(mutableTick));
+		return new TimeSeries(tickList);
+	}
+
 	private Tick createTick(MutableTick mutableTick){
 		return new Tick(mutableTick.getPeriod(), mutableTick.getEndDateTime(),
 				mutableTick.getOpenPrice(), mutableTick.getHighPrice(), mutableTick.getLowPrice(),

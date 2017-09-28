@@ -349,6 +349,128 @@ public class RsiPremiumStrategy {
         return indicatorsValuesMap;
     }
 
+
+    public Map<String, List<Object>> genBestDataSetfor3(int predictionTimeMinutes) {
+        Map<String, List<Object>> indicatorsValuesMap = new LinkedHashMap<>();
+        List<Object> bbSizeBand = new LinkedList<>();
+        List<Object> bbPricePosition = new LinkedList<>();
+        List<Object> rsiExtremeSignalScaledList = new LinkedList<>();
+        List<Object> cciBreakScaledList = new LinkedList<>();
+        List<Object> macdValues = new LinkedList<>();
+        List<Object> predictionVal = new LinkedList<>();
+
+
+        List<Object> bbSizeBandDaily = new LinkedList<>();
+        List<Object> bbPricePositionDaily = new LinkedList<>();
+        List<Object> rsiExtremeSignalScaledListDaily = new LinkedList<>();
+        List<Object> cciBreakScaledListDaily = new LinkedList<>();
+        List<Object> macdValuesDaily = new LinkedList<>();
+        List<Object> predictionValDaily = new LinkedList<>();
+
+
+        List<Object> bbSizeBandWeekly = new LinkedList<>();
+        List<Object> bbPricePositionWeekly = new LinkedList<>();
+        List<Object> rsiExtremeSignalScaledListWeekly = new LinkedList<>();
+        List<Object> cciBreakScaledListWeekly = new LinkedList<>();
+        List<Object> macdValuesWeekly = new LinkedList<>();
+        List<Object> predictionValWeekly = new LinkedList<>();
+
+
+        List<Object> bbSizeBandMonthly = new LinkedList<>();
+        List<Object> bbPricePositionMonthly = new LinkedList<>();
+        List<Object> rsiExtremeSignalScaledListMonthly = new LinkedList<>();
+        List<Object> cciBreakScaledListMonthly = new LinkedList<>();
+        List<Object> macdValuesMonthly = new LinkedList<>();
+        List<Object> predictionValMonthly = new LinkedList<>();
+
+
+
+        LinkedHashMap<LocalDate, TimeSeries> timeSeriesMapDaily = new LinkedHashMap<>();
+        LinkedHashMap<Integer, TimeSeries> timeSeriesMapMonthly = new LinkedHashMap<>();
+        LocalDate date = null;
+        Tick tick;
+        List<DateTimeFormatter> format = new LinkedList<DateTimeFormatter>();
+        format.add(DateTimeFormat.forPattern("HH:mm dd/MM/yyyy"));
+        CsvUtil csv = new CsvUtil();
+        String weeknum;
+        WeekFields US_WEEK_FIELDS = WeekFields.of(DayOfWeek.SUNDAY, 4);
+
+        TimeSeries ts = rsi.getTimeSeries();
+        for (int i = 0; i < ts.getEnd() - predictionTimeMinutes; i++) {
+            tick = ts.getTick(i);
+
+            date = new DateParser().parseDate(tick.getDateName(), format).toLocalDate();
+            if (!timeSeriesMapDaily.containsKey(date)) {
+                Map<String, List<Object>> indicatorsMap = new LinkedHashMap<>();
+                timeSeriesMapDaily.put(date, new TimeSeries(Period.minutes(1)));
+                indicatorsMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
+                indicatorsMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
+                indicatorsMap.put(macd.getClass().getSimpleName(), macdValues);
+                indicatorsMap.put("bbSizeBand", bbSizeBand);
+                indicatorsMap.put("bbPricePosition", bbPricePosition);
+                indicatorsMap.put("Prediction", predictionVal);
+                if (timeSeriesMapDaily.size() > 0 && timeSeriesMapDaily.containsKey(date.minusDays(1))) {
+                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/30-minCCi/daily", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
+                }
+                rsiExtremeSignalScaledList.clear();
+                macdValues.clear();
+                predictionVal.clear();
+                bbSizeBand.clear();
+                bbPricePosition.clear();
+            }
+
+//            weeknum = String.valueOf(java.time.LocalDate.of(date.getYear(),date.getMonthOfYear(),date.getDayOfMonth()).get(US_WEEK_FIELDS.weekOfWeekBasedYear()));
+//            if (timeSeriesMap.containsKey(weeknum)){
+//
+//            }
+
+            date = new DateParser().parseDate(tick.getDateName(), format).toLocalDate();
+            if (timeSeriesMapMonthly.containsKey(date.getMonthOfYear())){
+                timeSeriesMapMonthly.put(date.getMonthOfYear(), new TimeSeries(Period.minutes(1)));
+                indicatorsValuesMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
+                indicatorsValuesMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
+                indicatorsValuesMap.put(macd.getClass().getSimpleName(), macdValues);
+                indicatorsValuesMap.put("bbSizeBand", bbSizeBand);
+                indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
+                indicatorsValuesMap.put("Prediction", predictionVal);
+                if (timeSeriesMapMonthly.size() > 0 && timeSeriesMapMonthly.containsKey(date.getMonthOfYear()-1)) {
+                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/30-minCCi/monthly", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
+                }
+                rsiExtremeSignalScaledList.clear();
+                macdValues.clear();
+                predictionVal.clear();
+                indicatorsValuesMap = new LinkedHashMap<>();
+            }
+
+            macdValues.add(macd.getValue(i));
+            if (ts.getTick(i + predictionTimeMinutes).getClosePrice().isGreaterThan(ts.getTick(i).getClosePrice())) {
+                predictionVal.add("up");
+            } else if (ts.getTick(i + predictionTimeMinutes).getClosePrice()
+                    .isLessThan(ts.getTick(i).getClosePrice())) {
+                predictionVal.add("down");
+            } else {
+                predictionVal.add("no");
+            }
+            bbSizeBand.add(bbBandSize(bbUpper.getValue(i),bbLower.getValue(i)));
+            bbPricePosition.add(bbWithScaledPricePosition(bbUpper.getValue(i),bbLower.getValue(i),bbMiddle.getValue(i),tick.getClosePrice()));
+            rsiExtremeSignalScaledList.add(makeRsiScaledSignal(rsi.getValue(i), 0.2).toString());
+            cciBreakScaledList.add(makeCciScaledSignal(cci.getValue(i),0.2).toString());
+
+            date = new DateParser().parseDate(tick.getDateName(), format).toLocalDate();
+
+        }
+
+        indicatorsValuesMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
+        indicatorsValuesMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
+        indicatorsValuesMap.put(macd.getClass().getSimpleName(), macdValues);
+        indicatorsValuesMap.put("bbSizeBand", bbSizeBand);
+        indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
+        indicatorsValuesMap.put("Prediction", predictionVal);
+        return indicatorsValuesMap;
+    }
+
+
+
     public Map<String, List<Object>> genBestDataSetDaily(int predictionTimeMinutes) {
         Map<String, List<Object>> indicatorsValuesMap = new LinkedHashMap<>();
         List<Object> bbSizeBand = new LinkedList<>();
@@ -364,12 +486,13 @@ public class RsiPremiumStrategy {
         List<DateTimeFormatter> format = new LinkedList<DateTimeFormatter>();
         format.add(DateTimeFormat.forPattern("HH:mm dd/MM/yyyy"));
         CsvUtil csv = new CsvUtil();
-
+        LocalDate last = LocalDate.now();
         TimeSeries ts = rsi.getTimeSeries();
         for (int i = 0; i < ts.getEnd() - predictionTimeMinutes; i++) {
             tick = ts.getTick(i);
             date = new DateParser().parseDate(tick.getDateName(), format).toLocalDate();
             if (timeSeriesMap.containsKey(date)) {
+                last = date;
                 macdValues.add(macd.getValue(i));
                 if (ts.getTick(i + predictionTimeMinutes).getClosePrice().isGreaterThan(ts.getTick(i).getClosePrice())) {
                     predictionVal.add("up");
@@ -384,20 +507,21 @@ public class RsiPremiumStrategy {
                 bbSizeBand.add(bbBandSize(bbUpper.getValue(i),bbLower.getValue(i)));
                 bbPricePosition.add(bbWithScaledPricePosition(bbUpper.getValue(i),bbLower.getValue(i),bbMiddle.getValue(i),tick.getClosePrice()));
                 cciBreakScaledList.add(makeCciScaledSignal(cci.getValue(i),0.2).toString());
-            } else {
-                timeSeriesMap.put(date, new TimeSeries(Period.minutes(1)));
+                 } else {
                 indicatorsValuesMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
                 indicatorsValuesMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
                 indicatorsValuesMap.put(macd.getClass().getSimpleName(), macdValues);
                 indicatorsValuesMap.put("bbSizeBand", bbSizeBand);
                 indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
                 indicatorsValuesMap.put("Prediction", predictionVal);
-                if (timeSeriesMap.size() > 0 && timeSeriesMap.containsKey(date.minusDays(1))) {
-                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/daily", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
+                if (timeSeriesMap.size() > 0 && timeSeriesMap.containsKey(last)) {
+                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi/daily", last.toString() + ".csv", indicatorsValuesMap);
                 }
+                timeSeriesMap.put(date, new TimeSeries(Period.minutes(1)));
                 rsiExtremeSignalScaledList.clear();
                 macdValues.clear();
                 predictionVal.clear();
+                cciBreakScaledList.clear();
                 bbSizeBand.clear();
                 bbPricePosition.clear();
                 indicatorsValuesMap = new LinkedHashMap<>();
@@ -425,7 +549,7 @@ public class RsiPremiumStrategy {
         indicatorsValuesMap.put("bbSizeBand", bbSizeBand);
         indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
         indicatorsValuesMap.put("Prediction", predictionVal);
-        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/daily", date.toString() + ".csv", indicatorsValuesMap);
+        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi/daily", last.toString() + ".csv", indicatorsValuesMap);
         return indicatorsValuesMap;
     }
 
@@ -478,11 +602,12 @@ public class RsiPremiumStrategy {
                 indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
                 indicatorsValuesMap.put("Prediction", predictionVal);
                 if (timeSeriesMap.size() > 0 && timeSeriesMap.containsKey(String.valueOf(Integer.valueOf(weeknum)-1))) {
-                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/weekly", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
+                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi/weekly", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
                 }
                 rsiExtremeSignalScaledList.clear();
                 macdValues.clear();
                 predictionVal.clear();
+                cciBreakScaledList.clear();
                 bbSizeBand.clear();
                 bbPricePosition.clear();
                 indicatorsValuesMap = new LinkedHashMap<>();
@@ -509,7 +634,7 @@ public class RsiPremiumStrategy {
         indicatorsValuesMap.put("bbSizeBand", bbSizeBand);
         indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
         indicatorsValuesMap.put("Prediction", predictionVal);
-        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/weekly", date.toString() + ".csv", indicatorsValuesMap);
+        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi/weekly", date.toString() + ".csv", indicatorsValuesMap);
         return indicatorsValuesMap;
     }
 
@@ -561,9 +686,12 @@ public class RsiPremiumStrategy {
                 indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
                 indicatorsValuesMap.put("Prediction", predictionVal);
                 if (timeSeriesMap.size() > 0 && timeSeriesMap.containsKey(date.getMonthOfYear()-1)) {
-                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/monthly", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
+                    csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi/monthly", date.minusDays(1).toString() + ".csv", indicatorsValuesMap);
                 }
                 rsiExtremeSignalScaledList.clear();
+                cciBreakScaledList.clear();
+                bbPricePosition.clear();
+                bbSizeBand.clear();
                 macdValues.clear();
                 predictionVal.clear();
                 indicatorsValuesMap = new LinkedHashMap<>();
@@ -583,7 +711,6 @@ public class RsiPremiumStrategy {
                 bbSizeBand.add(bbBandSize(bbUpper.getValue(i),bbLower.getValue(i)));
                 bbPricePosition.add(bbWithScaledPricePosition(bbUpper.getValue(i),bbLower.getValue(i),bbMiddle.getValue(i),tick.getClosePrice()));
             }
-
         }
         indicatorsValuesMap.put("RSI EXTREME SCALED", rsiExtremeSignalScaledList);
         indicatorsValuesMap.put("CCI CHANNEL BREAK SCALED", cciBreakScaledList);
@@ -591,7 +718,7 @@ public class RsiPremiumStrategy {
         indicatorsValuesMap.put("bbSizeBand", bbSizeBand);
         indicatorsValuesMap.put("bbPricePosition", bbPricePosition);
         indicatorsValuesMap.put("Prediction", predictionVal);
-        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/5min-CCi/monthly", date.toString() + ".csv", indicatorsValuesMap);
+        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE/1h-CCi/monthly", date.toString() + ".csv", indicatorsValuesMap);
         return indicatorsValuesMap;
     }
 

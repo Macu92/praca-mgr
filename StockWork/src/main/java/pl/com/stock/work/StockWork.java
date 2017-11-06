@@ -168,10 +168,10 @@ public class StockWork {
         RsiPremiumStrategy rsiPrem = new RsiPremiumStrategy(rsi, cci, bbu, bbl);
         rsiPrem.setBbMiddle(bbm);
         rsiPrem.setMacd(macd);
-        Map<String, List<Object>> map = rsiPrem.genBestDataSet(5);//rsiPrem.createIndicatorValuesMap(5);
+        Map<String, List<Object>> map = rsiPrem.dataSetVol3(5);//rsiPrem.createIndicatorValuesMap(5);
 //		csv.writeToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", rsi, cci, bbu,bbm, bbl, macd);
 //		csv.writeMapToFile("C:/Users/Maciek/Documents/UCZELNIA/praca-mgr/generowaneDane", map);
-        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE", "bestset-v1.csv", map);
+        csv.writeMapToFile("F:/dev-workspace/UCZELNIA/praca-mgr/generowaneDane/POPRAWIONE", "to-presentatnion.csv", map);
     }
 
     private static Map<LocalDate, TimeSeries> generateDailyTimeSeries(TimeSeries timeSeries) {

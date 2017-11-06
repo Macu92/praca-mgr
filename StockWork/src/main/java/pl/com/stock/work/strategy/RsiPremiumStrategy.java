@@ -249,8 +249,8 @@ public class RsiPremiumStrategy {
             bbSizeBand.add(bbBandSize(bbUpper.getValue(i),bbLower.getValue(i)));
             bbPricePosition.add(bbWithScaledPricePosition(bbUpper.getValue(i),bbLower.getValue(i),bbMiddle.getValue(i),tick.getClosePrice()));
             macdValues.add(macd.getValue(i));
-            rsiValues.add(scaleRsiValue(rsi.getValue(i)).toString());
-            cciValues.add(scaleCCiValue(cci.getValue(i)).toString());
+            rsiValues.add(rsi.getValue(i));
+            cciValues.add(cci.getValue(i));
             rsiValuesScaled.add(scaleRsiValue(rsi.getValue(i)).toString());
             cciValuesScaled.add(scaleCCiValue(cci.getValue(i)).toString());
             if (ts.getTick(i + predictionTimeMinutes).getClosePrice().isGreaterThan(tick.getClosePrice())) {
